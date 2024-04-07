@@ -10,8 +10,6 @@ try {
 catch {
     # Manejar cualquier error que ocurra durante la descarga
     Write-Host "Ocurrió un error durante la ejecución del script."
-    Write-Host "Presiona Enter para salir."
-    $null = Read-Host
 }
 
 # Ruta donde se guardará el script de Python
