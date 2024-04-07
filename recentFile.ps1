@@ -34,7 +34,7 @@ function Get-MostRecentFile {
     $recentFile = $null
     $recentDate = $null
 
-    Get-ChildItem $directory | Where-Object { -not $_.PSIsContainer } | ForEach-Object {
+    Get-ChildItem $directory -File | ForEach-Object {
         $fileDate = $_.LastWriteTime
         if ($recentFile -eq $null -or $fileDate -gt $recentDate) {
             $recentFile = $_.Name
@@ -53,7 +53,7 @@ function Get-FolderSize {
 
     $totalSize = 0
 
-    Get-ChildItem $folder -Recurse | Where-Object { -not $_.PSIsContainer } | ForEach-Object {
+    Get-ChildItem $folder -Recurse -File | ForEach-Object {
         $totalSize += $_.Length
     }
 
@@ -77,8 +77,32 @@ function Convert-BytesToHumanReadable {
     return "{0:N2} {1}" -f $sizeInBytes, $units[$index]
 }
 
+# Función para recorrer todas las subcarpetas de forma recursiva
+function Recursively-GetFiles {
+    param(
+        [string]$folder
+    )
+
+    Get-ChildItem $folder -Directory | ForEach-Object {
+        $subfolderPath = $_.FullName
+        $subfolderName = $_.Name
+
+        $fileRecent, $dateRecent = Get-MostRecentFile $subfolderPath
+        $formattedDate = Get-Date $dateRecent -Format "dd/MM/yyyy"
+        $folderSize = Get-FolderSize $subfolderPath
+        $formattedSize = Convert-BytesToHumanReadable $folderSize
+
+        $sheet.Cells.Item($sheet.UsedRange.Rows.Count + 1, 1).Value2 = $subfolderName
+        $sheet.Cells.Item($sheet.UsedRange.Rows.Count, 2).Value2 = $fileRecent
+        $sheet.Cells.Item($sheet.UsedRange.Rows.Count, 3).Value2 = $formattedDate
+        $sheet.Cells.Item($sheet.UsedRange.Rows.Count, 4).Value2 = $formattedSize
+
+        Recursively-GetFiles $subfolderPath
+    }
+}
+
 # Recorrer cada directorio en la ruta proporcionada
-foreach ($folder in Get-ChildItem $rute_dir | Where-Object { $_.PSIsContainer }) {
+foreach ($folder in Get-ChildItem $rute_dir -Directory) {
     $folderPath = $folder.FullName
 
     # Obtener el archivo más reciente, la fecha y el tamaño de la carpeta
@@ -93,6 +117,8 @@ foreach ($folder in Get-ChildItem $rute_dir | Where-Object { $_.PSIsContainer })
     $sheet.Cells.Item($sheet.UsedRange.Rows.Count, 2).Value2 = $fileRecent
     $sheet.Cells.Item($sheet.UsedRange.Rows.Count, 3).Value2 = $formattedDate
     $sheet.Cells.Item($sheet.UsedRange.Rows.Count, 4).Value2 = $formattedSize
+
+    Recursively-GetFiles $folderPath
 }
 
 # Guardar el archivo de Excel
