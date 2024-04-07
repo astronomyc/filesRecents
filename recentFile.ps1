@@ -1,5 +1,5 @@
 # Descargar openpyxl manualmente
-$openpyxlURL = 'https://files.pythonhosted.org/packages/14/a2/6de434fa5d52ec418b0cd9eaffc81d23514ed971e7c3b9d7025eb9c1666f/openpyxl-3.0.9.tar.gz'
+$openpyxlURL = 'https://files.pythonhosted.org/packages/42/e8/af028681d493814ca9c2ff8106fc62a4a32e4e0ae14602c2a98fc7b741c8/openpyxl-3.1.2.tar.gz'
 $openpyxlPath = "$env:TEMP\openpyxl.tar.gz"
 Invoke-WebRequest -Uri $openpyxlURL -OutFile $openpyxlPath
 
