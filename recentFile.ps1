@@ -1,5 +1,33 @@
+Clear-Host
+Write-Host "-------------------------------------------------------------------------"
+Write-Host ""
+Write-Host ""
+Write-Host "                    Bienvenido al Script para"
+Write-Host "                    verificar el archivo mas"
+Write-Host "                    reciente de cada carpeta"
+Write-Host ""
+Write-Host "                                                             astronomyc"
+Write-Host "-------------------------------------------------------------------------"
+
+# Definir la clave
+$pass = "skyrecientes2024*"
+
+# Solicitar la clave al usuario
+$inputPass = Read-Host "Ingrese clave de confirmacion"
+
+# Verificar si la clave ingresada es correcta
+Clear-Host
+if ($inputPass -ne $pass) {
+    Write-Host "Clave no autentificada, Cerrando el script"
+    exit 3
+}
+
 # Obtener la ruta del directorio desde el usuario
 $rute_dir = Read-Host "Ingrese la ruta del directorio"
+
+# Obtener la cantidad total de carpetas a procesar
+$totalFolders = (Get-ChildItem $rute_dir -Directory).Count
+$currentFolderIndex = 0
 
 # Crear un nuevo objeto Excel
 $excel = New-Object -ComObject Excel.Application
@@ -44,14 +72,39 @@ function Get-MostRecentFile {
     return $recentFile, $recentDate
 }
 
+Clear-Host
 # Recorrer cada directorio en la ruta proporcionada
 foreach ($folder in Get-ChildItem $rute_dir -Directory) {
+    $currentFolderIndex++
     $folderPath = $folder.FullName
 
     # Obtener el archivo más reciente y la fecha de la carpeta
     $fileRecent, $dateRecent = Get-MostRecentFile $folderPath
-    $formattedDate = Get-Date $dateRecent -Format "dd/MM/yyyy"
     $folderName = $folder.Name
+
+    # Formatear la fecha solo si no es nula
+    if ($dateRecent) {
+        $formattedDate = Get-Date $dateRecent -Format "dd/MM/yyyy"
+    } else {
+        $formattedDate = ""
+    }
+
+
+# Calcular el progreso y mostrarlo en la consola
+    $progressPercentage = [Math]::Round(($currentFolderIndex / $totalFolders) * 100, 2)
+    $status = "Procesando carpeta $currentFolderIndex de $totalFolders ($progressPercentage% completado)..."
+    Write-Progress -Activity "Procesando carpetas / Hecho por David para Daniel - Contactame con: devastronomyc@outlook.com" -Status $status -PercentComplete $progressPercentage
+
+    # Imprimir líneas adicionales en la consola
+    Write-Host "Carpeta actual: $folderName"
+    Write-Host "Archivo mas reciente: $fileRecent"
+    Write-Host "Fecha mas reciente: $formattedDate"
+    Write-Host " "
+    Write-Host "HECHO POR: ASTRONOMYC"
+    Write-Host " "
+    Write-Host " "
+
+
 
     # Escribir los datos en el archivo Excel
     $sheet.Cells.Item($sheet.UsedRange.Rows.Count + 1, 1).Value2 = $folderName
@@ -61,6 +114,9 @@ foreach ($folder in Get-ChildItem $rute_dir -Directory) {
     $sheet.Cells.Item($sheet.UsedRange.Rows.Count, 3).NumberFormat = "@" # Formatear la celda como texto
     $sheet.Cells.Item($sheet.UsedRange.Rows.Count, 3).Value2 = $formattedDate
 }
+
+# Ocultar la barra de progreso al finalizar
+Write-Progress -Activity "Procesando carpetas" -Completed
 
 # Guardar el archivo de Excel
 $excel.Visible = $false
