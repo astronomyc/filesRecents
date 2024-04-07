@@ -23,3 +23,5 @@ python $TempPythonScriptPath
 
 # Eliminar el archivo temporal después de la ejecución
 Remove-Item $TempPythonScriptPath
+
+Pause
