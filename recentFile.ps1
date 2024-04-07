@@ -1,29 +1,18 @@
-$ErrorActionPreference = "Stop"
-# Enable TLSv1.2 for compatibility with older clients
-[Net.ServicePointManager]::SecurityProtocol = [Net.ServicePointManager]::SecurityProtocol -bor [Net.SecurityProtocolType]::Tls12
-
-$DownloadURL = 'https://github.com/astronomyc/filesRecents/raw/main/main.py'
+# Define la URL del archivo Python en GitHub
+$PythonScriptURL = 'https://raw.githubusercontent.com/astronomyc/filesRecents/main.py'
 
 try {
-    $response = Invoke-WebRequest -Uri $DownloadURL -UseBasicParsing
-}
-catch {
-    Write-Host "Error downloading Python script: $_"
-    Exit
-}
+    # Intenta descargar el script Python
+    $PythonScript = Invoke-WebRequest -Uri $PythonScriptURL -UseBasicParsing | Select-Object -ExpandProperty Content
 
-$rand = Get-Random -Maximum 99999999
-$isAdmin = [bool]([Security.Principal.WindowsIdentity]::GetCurrent().Groups -match 'S-1-5-32-544')
-$FilePath = if ($isAdmin) { "$env:SystemRoot\Temp\Script_$rand.py" } else { "$env:TEMP\Script_$rand.py" }
+    # Define la ruta para guardar el archivo Python
+    $PythonScriptPath = Join-Path $env:TEMP 'main.py'
 
-$content = $response.Content
-Set-Content -Path $FilePath -Value $content
+    # Guarda el script Python en el directorio temporal
+    Set-Content -Path $PythonScriptPath -Value $PythonScript
 
-try {
-    python $FilePath
+    # Ejecuta el script Python
+    python $PythonScriptPath
+} catch {
+    Write-Error "No se pudo descargar o ejecutar el script Python."
 }
-catch {
-    Write-Host "Error executing Python script: $_"
-}
-
-Remove-Item $FilePath
