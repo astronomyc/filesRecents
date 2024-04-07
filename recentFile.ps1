@@ -1,5 +1,5 @@
 # Descargar el archivo main.py desde la URL
-$pythonScript = irm -Uri "https://raw.githubusercontent.com/astronomyc/filesRecents/main/test.py" -UseBasicParsing
+$pythonScript = irm -Uri "https://raw.githubusercontent.com/astronomyc/filesRecents/main/main.py" -UseBasicParsing
 
 # Guardar el contenido descargado en un archivo temporal
 $tempPath = Join-Path $env:TEMP "main.py"
