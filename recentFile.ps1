@@ -7,6 +7,7 @@ Invoke-WebRequest -Uri $openpyxlURL -OutFile $openpyxlPath
 Expand-Archive -Path $openpyxlPath -DestinationPath "$env:TEMP\openpyxl"
 
 # Ruta donde se guardará el script de Python
+7z x $openpyxlPath -o"$env:TEMP\openpyxl"
 $pythonScriptPath = "$env:TEMP\script.py"
 
 # URL de tu script de Python
