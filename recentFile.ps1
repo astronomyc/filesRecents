@@ -96,7 +96,7 @@ foreach ($folder in Get-ChildItem $rute_dir -Directory) {
     Write-Progress -Activity "Procesando carpetas / Hecho por David para Daniel - Contactame con: devastronomyc@outlook.com" -Status $status -PercentComplete $progressPercentage
 
     # Imprimir líneas adicionales en la consola
-    Write-Host "Carpeta actual: $folderName"
+    Write-Host "Carpeta: $folderName"
     Write-Host "Archivo mas reciente: $fileRecent"
     Write-Host "Fecha mas reciente: $formattedDate"
     Write-Host " "
@@ -118,10 +118,21 @@ foreach ($folder in Get-ChildItem $rute_dir -Directory) {
 # Ocultar la barra de progreso al finalizar
 Write-Progress -Activity "Procesando carpetas" -Completed
 
-# Guardar el archivo de Excel
-$excel.Visible = $false
-$workbook.SaveAs("$rute_dir\ArchivosRecientes.xlsx")
-$excel.Quit()
-[System.Runtime.Interopservices.Marshal]::ReleaseComObject($excel) | Out-Null
-Remove-Variable excel, workbook, sheet
-Write-Host "Complete"
+# Preguntar al usuario si desea guardar el archivo de Excel
+$saveExcel = Read-Host "Desea guardar el archivo de Excel? (Si/No)"
+
+if ($saveExcel -eq "Sí" -or $saveExcel -eq "sí" -or $saveExcel -eq "Si" -or $saveExcel -eq "si") {
+    # Guardar el archivo de Excel
+    $excel.Visible = $false
+    $workbook.SaveAs("$rute_dir\ArchivosRecientes.xlsx")
+    $excel.Quit()
+    [System.Runtime.Interopservices.Marshal]::ReleaseComObject($excel) | Out-Null
+    Remove-Variable excel, workbook, sheet
+    Write-Host "Archivo de Excel guardado exitosamente."
+} else {
+    # Si el usuario elige no guardar el archivo, cerrar Excel y liberar recursos
+    $excel.Quit()
+    [System.Runtime.Interopservices.Marshal]::ReleaseComObject($excel) | Out-Null
+    Remove-Variable excel, workbook, sheet
+    Write-Host "El archivo de Excel no se guardo."
+}
